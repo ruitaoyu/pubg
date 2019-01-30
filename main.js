@@ -681,6 +681,9 @@ gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
 
     //var fire = new Fire(gameEngine);
     gameEngine.addEntity(new OBJ(0,0,64,64,100,100,100,100,AM.getAsset("./img/sk.png")));
+
+
+    gameEngine.addEntity(new OBJ(0,0,64,64,100,100,100,100,AM.getAsset("./img/suitMan.png")));
     //gameEngine.addEntity(new Guy(gameEngine, AM.getAsset("./img/guy.jpg")));
 
     gameEngine.start();

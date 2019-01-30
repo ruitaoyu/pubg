@@ -57,90 +57,50 @@ Animation.prototype.isDone = function () {
     return (this.elapsedTime >= this.totalTime);
 }
 
-function Unicorn(game) {
-    this.animation = new Animation(AM.getAsset("./img/runingman.png"), 0, 0, 165, 295, 0.05, 25, true, false);
-    this.jumpAnimation = new Animation(AM.getAsset("./img/runingman.png"), 0, 885, 165, 295, 0.05, 28, false, false);
-    this.jumping = false;
-    this.radius = 100;
-    this.ground = 400;
-    Entity.call(this, game, 100, 400);
-}
+// function Unicorn(game) {
+//     this.animation = new Animation(AM.getAsset("./img/runingman.png"), 0, 0, 165, 295, 0.05, 25, true, false);
+//     this.jumpAnimation = new Animation(AM.getAsset("./img/runingman.png"), 0, 885, 165, 295, 0.05, 28, false, false);
+//     this.jumping = false;
+//     this.radius = 100;
+//     this.ground = 400;
+//     Entity.call(this, game, 100, 400);
+// }
 
-Unicorn.prototype = new Entity();
-Unicorn.prototype.constructor = Unicorn;
+// Unicorn.prototype = new Entity();
+// Unicorn.prototype.constructor = Unicorn;
 
-Unicorn.prototype.update = function () {
-    if (this.game.space) this.jumping = true;
-    if (this.jumping) {
-        if (this.jumpAnimation.isDone()) {
-            this.jumpAnimation.elapsedTime = 0;
-            this.jumping = false;
-        }
-        var jumpDistance = this.jumpAnimation.elapsedTime / this.jumpAnimation.totalTime;
-        var totalHeight = 100;
+// Unicorn.prototype.update = function () {
+//     if (this.game.space) this.jumping = true;
+//     if (this.jumping) {
+//         if (this.jumpAnimation.isDone()) {
+//             this.jumpAnimation.elapsedTime = 0;
+//             this.jumping = false;
+//         }
+//         var jumpDistance = this.jumpAnimation.elapsedTime / this.jumpAnimation.totalTime;
+//         var totalHeight = 100;
 
-        if (jumpDistance > 0.5)
-            jumpDistance = 1 - jumpDistance;
+//         if (jumpDistance > 0.5)
+//             jumpDistance = 1 - jumpDistance;
 
-        //var height = jumpDistance * 2 * totalHeight;
-        var height = totalHeight*(-4 * (jumpDistance * jumpDistance - jumpDistance));
-        this.y = this.ground - height;
-    }
-    Entity.prototype.update.call(this);
-}
+//         //var height = jumpDistance * 2 * totalHeight;
+//         var height = totalHeight*(-4 * (jumpDistance * jumpDistance - jumpDistance));
+//         this.y = this.ground - height;
+//     }
+//     Entity.prototype.update.call(this);
+// }
 
-Unicorn.prototype.draw = function (ctx) {
-    if (this.jumping) {
-        this.jumpAnimation.drawFrame(this.game.clockTick, ctx, this.x, this.y,0.5);
-    }
-    else {
-        this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y,0.5);
-    }
-    Entity.prototype.draw.call(this);
-}
+// Unicorn.prototype.draw = function (ctx) {
+//     if (this.jumping) {
+//         this.jumpAnimation.drawFrame(this.game.clockTick, ctx, this.x, this.y,0.5);
+//     }
+//     else {
+//         this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y,0.5);
+//     }
+//     Entity.prototype.draw.call(this);
+// }
 
 
-function Player(game) {
-    this.animation = new Animation(AM.getAsset("./img/suitMan.png"), 64, 0, 64, 64, 0.05, 32, true, false);
-    this.jumpAnimation = new Animation(AM.getAsset("./img/runingman.png"), 0, 885, 165, 295, 0.05, 28, false, false);
-    this.jumping = false;
-    this.radius = 100;
-    this.ground = 400;
-    Entity.call(this, game, 100, 400);
-}
 
-Player.prototype = new Entity();
-Player.prototype.constructor = Player;
-
-Player.prototype.update = function () {
-    if (this.game.space) this.jumping = true;
-    if (this.jumping) {
-        if (this.jumpAnimation.isDone()) {
-            this.jumpAnimation.elapsedTime = 0;
-            this.jumping = false;
-        }
-        var jumpDistance = this.jumpAnimation.elapsedTime / this.jumpAnimation.totalTime;
-        var totalHeight = 100;
-
-        if (jumpDistance > 0.5)
-            jumpDistance = 1 - jumpDistance;
-
-        //var height = jumpDistance * 2 * totalHeight;
-        var height = totalHeight*(-4 * (jumpDistance * jumpDistance - jumpDistance));
-        this.y = this.ground - height;
-    }
-    Entity.prototype.update.call(this);
-}
-
-Player.prototype.draw = function (ctx) {
-    if (this.jumping) {
-        this.jumpAnimation.drawFrame(this.game.clockTick, ctx, this.x, this.y,1);
-    }
-    else {
-        this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y,1.5);
-    }
-    Entity.prototype.draw.call(this);
-}
 
 
 
@@ -340,6 +300,177 @@ Land.prototype.update = function () {
 
 
 
+
+
+function Player(game) {
+    this.animation = new Animation(AM.getAsset("./img/sk.png"), 64, 0, 64, 64, 0.05, 1, true, false);
+
+    this.northanimation = new Animation(AM.getAsset("./img/sk.png"), 64, 0, 64, 64, 0.05, 8, true, false);
+
+    this.jumpAnimation = new Animation(AM.getAsset("./img/runingman.png"), 0, 885, 165, 295, 0.05, 28, false, false);
+    this.jumping = false;
+    this.north = false;
+    this.radius = 100;
+    this.ground = 400;
+    Entity.call(this, game, 100, 400);
+}
+
+Player.prototype = new Entity();
+Player.prototype.constructor = Player;
+
+Player.prototype.update = function () {
+    if (this.game.space) this.jumping = true;
+    if (this.jumping) {
+        if (this.jumpAnimation.isDone()) {
+            this.jumpAnimation.elapsedTime = 0;
+            this.jumping = false;
+        }
+        var jumpDistance = this.jumpAnimation.elapsedTime / this.jumpAnimation.totalTime;
+        var totalHeight = 100;
+
+        if (jumpDistance > 0.5)
+            jumpDistance = 1 - jumpDistance;
+
+        //var height = jumpDistance * 2 * totalHeight;
+        var height = totalHeight*(-4 * (jumpDistance * jumpDistance - jumpDistance));
+        this.y = this.ground - height;
+    } 
+    Entity.prototype.update.call(this);
+}
+
+Player.prototype.draw = function (ctx) {
+    // if (this.jumping) {
+    //     this.jumpAnimation.drawFrame(this.game.clockTick, ctx, this.x, this.y,1);
+    // }
+    // else {
+    //     this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y,1.5);
+    // }
+    if (this.north) {
+        this.northnimation.drawFrame(this.game.clockTick, ctx, this.x, this.y,1);
+    }
+    else {
+        this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y,1.5);
+    }
+    Entity.prototype.draw.call(this);
+}
+
+
+
+function OBJ(sx,sy,sw,sh,cx,cy,cw,ch,img) {
+    this.sheetX = sx;
+    this.sheetY = sy;
+    this.sheetWidth = sw;
+    this.sheetHeight = sh;
+    this.canvasX = cx;
+    this.canvasY = cy;
+    this.canvasWidth = cw;
+    this.canvasHeight = ch;
+    this.img =img;
+    this.lastDir = 38;
+    this.speed = 15;
+}
+
+OBJ.prototype.goForward = function(dir) {
+    //console.log("go");
+    switch(dir) {
+      case 38:
+        if(this.lastDir == dir) {
+            //console.log("yes");
+            this.sheetX += 64;
+            this.canvasY -=this.speed;
+            if(this.sheetX >= 576) {
+                this.sheetX =0;
+            }
+        } else {
+            this.sheetX = 0;
+            this.sheetY = 0;
+            this.lastDir =dir;
+        }
+        break;
+      case 40:
+        if(this.lastDir == dir) {
+            //console.log("yes");
+            this.sheetX += 64;
+            this.canvasY +=this.speed;
+            if(this.sheetX >= 576) {
+                this.sheetX =0;
+            }
+        } else {
+            this.sheetX = 0;
+            this.sheetY = 128;
+            this.lastDir =dir;
+        }
+        break;
+      case 37:
+        if(this.lastDir == dir) {
+            //console.log("yes");
+            this.sheetX += 64;
+            this.canvasX -=this.speed;
+            if(this.sheetX >= 576) {
+                this.sheetX =0;
+            }
+        } else {
+            this.sheetX = 0;
+            this.sheetY = 64;
+            this.lastDir =dir;
+        }
+        break;
+      case 39:
+        if(this.lastDir == dir) {
+            //console.log("yes");
+            this.sheetX += 64;
+            this.canvasX +=this.speed;
+            if(this.sheetX >= 576) {
+                this.sheetX =0;
+            }
+        } else {
+            this.sheetX = 0;
+            this.sheetY = 192;
+            this.lastDir =dir;
+        }
+        break;
+      default:
+        // code block
+    }
+}
+
+OBJ.prototype.update = function() {
+
+}
+
+OBJ.prototype.nextFrame = function(dir) {
+    switch(dir) {
+      case 'south':
+        this.canvasY += 3;
+        break;
+      case 'north':
+        this.canvasY -= 3;
+        break;
+      case 'west':
+        this.canvasX -= 3;
+        break;
+      case 'east':
+        this.canvasX += 3;
+        break;
+      default:
+        // code block
+    }
+}
+
+OBJ.prototype.draw = function (ctx) {
+    //console.log("inside draw");
+    ctx.drawImage(this.img,
+        this.sheetX, this.sheetY,  // source from sheet
+        this.sheetWidth, this.sheetHeight, // width and height of source
+        this.canvasX, this.canvasY, // destination coordinates
+        this.canvasWidth, this.canvasHeight); // destination width and height
+}
+
+
+
+
+
+
 AM.queueDownload("./img/RobotUnicorn.png");
 AM.queueDownload("./img/guy.jpg");
 AM.queueDownload("./img/mushroomdude.png");
@@ -367,6 +498,10 @@ AM.queueDownload("./img/painkiller.png");
 
 AM.queueDownload("./img/bush.png");
 AM.queueDownload("./img/land.png");
+
+AM.queueDownload("./img/sk.png");
+
+
 
 
 
@@ -541,13 +676,48 @@ gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
 
     
     //gameEngine.addEntity(unicorn);
-    var player = new Player(gameEngine);
-    gameEngine.addEntity(player);
+    // var player = new OBJ(gameEngine);
+    // gameEngine.addEntity(player);
 
     //var fire = new Fire(gameEngine);
-    //gameEngine.addEntity(fire);
+    gameEngine.addEntity(new OBJ(0,0,64,64,100,100,100,100,AM.getAsset("./img/sk.png")));
     //gameEngine.addEntity(new Guy(gameEngine, AM.getAsset("./img/guy.jpg")));
 
     gameEngine.start();
     console.log("All Done!");
 });
+
+// var keysDown = {};
+// try {
+//     if (window.addEventListener) {
+//         window.addEventListener("keydown", function (v) {keysDown[v.keyCode] = true;}, false);
+//         window.addEventListener("keyup", function (v) {delete keysDown[v.keyCode];}, false);
+//     } else if (document.attachEvent) {
+//         document.attachEvent("onkeydown", function (v) {keysDown[v.keyCode] = true;});
+//         document.attachEvent("onkeyup", function (v) {delete keysDown[v.keyCode];});
+//     } else if (window.attachEvent) {
+//         window.attachEvent("onkeydown", function (v) {keysDown[v.keyCode] = true;});
+//         window.attachEvent("onkeyup", function (v) {delete keysDown[v.keyCode];});
+//     } else {
+//         document.addEventListener("keydown", function (v) {keysDown[v.keyCode] = true;}, false);
+//         document.addEventListener("keyup", function (v) {delete keysDown[v.keyCode];}, false);
+//     }
+// } catch (e) {
+//     alert("Keys don't work!\nError: "+e);
+// }
+
+// var update = function () {
+//     if (38 in keysDown) { // Player holding up
+//         console.log("Key Up Event - Char " );
+//     }
+//     if (40 in keysDown) { // Player holding down
+       
+//     }
+//     if (37 in keysDown) { // Player holding left
+       
+//     }
+//     if (39 in keysDown) { // Player holding right
+        
+//     }
+// };
+// setInterval(update,10);

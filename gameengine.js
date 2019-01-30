@@ -102,7 +102,7 @@ GameEngine.prototype.startInput = function () {
     this.ctx.canvas.addEventListener("keyup", function (e) {
         that.keyDown.splice(that.keyDown.indexOf(e.keyCode),1);
         //console.log(e);
-        //console.log("Key Up Event - Char " + e.code + " Code " + e.keyCode);
+        console.log("Key Up Event - Char " + e.code + " Code " + e.keyCode);
     }, false);
 
     

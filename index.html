@@ -3,12 +3,127 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Game Project Shell</title>
+    <title>PUBG 90s</title>
     <script type="text/javascript" src="./gameengine.js"></script>
     <script type="text/javascript" src="./assetmanager.js"></script>
     <script type="text/javascript" src="./main.js"></script>
+
+    
+        <style>
+        .container {
+        position: relative;
+        width: 100%;
+        max-width: 1450px;
+        }
+
+        .container img {
+        width: 100%;
+        height: 850px;
+        }
+
+        .container .btn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        background-color: #555;
+        color: white;
+        font-size: 36px;
+        padding: 12px 24px;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        text-align: center;
+        }
+
+        .container .btn:hover {
+        background-color: black;
+        }
+
+        .chooseChar {
+        position: relative;
+        width: 100%;
+        max-width: 1450px;
+        }
+
+        .chooseChar img {
+        width: 100%;
+        height: 850px;
+        }
+
+        .chooseChar .btn2 {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        background-color: #555;
+        color: white;
+        font-size: 36px;
+        padding: 12px 24px;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        text-align: center;
+        }
+
+        .chooseChar .btn2:hover {
+        background-color: black;
+        }
+        </style>
 </head>
 <body>
+    <div class="container" id="coverContainer"> 
+        <img id = "cover" src="./img/pixelcover.png" alt="Flowers in Chania" >
+        <button class="btn" id="startBtn">START</button>
+    </div>
+        <audio id="chooseSong" loop>
+                <!-- <source src="horse.ogg" type="audio/ogg"> -->
+                <source src="./sound/choose.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="china" loop>
+                <!-- <source src="horse.ogg" type="audio/ogg"> -->
+                <source src="./sound/china.mp3" type="audio/mpeg">
+        </audio>
+
+    <div class="chooseChar" id="chooseContainer"> 
+            <img id = "select" src="./img/select.jpg" alt="Flowers in Chania" >
+            <button class="btn2" id="gamestart">START</button>
+    </div>
     <canvas id="gameWorld" tabindex="1" width="1400" height="750" style="border: 1px solid brown; background: lightskyblue"></canvas>
+    
+    <script>
+            var x = document.getElementById("startBtn");
+            
+            x.addEventListener("click", mySecondFunction);
+     
+            var enter = document.getElementById("gamestart");
+            
+            enter.addEventListener("click", myFunction);
+            
+   
+            
+            function mySecondFunction() {
+                document.getElementById("coverContainer").style.display = "none"
+                //document.getElementById("btn").style.display = "none"
+                document.getElementById("chooseSong").play()
+                //document.getElementById('gameWorld').focus();;
+
+            }
+
+            function myFunction() {
+                console.log("in");
+                document.getElementById("chooseContainer").style.display = "none"
+                //document.getElementById("btn").style.display = "none"
+                document.getElementById("chooseSong").src="";
+                document.getElementById("china").play()
+                document.getElementById('gameWorld').focus();;
+
+            }
+            
+  
+    </script>
+  
 </body>
 </html>

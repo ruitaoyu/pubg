@@ -221,4 +221,4 @@ Entity.prototype.rotateAndCache = function (image, angle) {
     return offscreenCanvas;
 }
 
-window.onscroll = function () { window.scrollTo(0, 0); };
+ window.onscroll = function () { window.scrollTo(0, 0); };

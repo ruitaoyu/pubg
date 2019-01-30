@@ -377,7 +377,18 @@ OBJ.prototype.goForward = function(dir) {
         if(this.lastDir == dir) {
             //console.log("yes");
             this.sheetX += 64;
-            this.canvasY -=this.speed;
+
+            var temp = this.canvasY;
+            temp-=this.speed;
+            //var temp = -1;
+            if (temp >-30) {
+                console.log(temp);
+                this.canvasY -=this.speed;
+            }
+            // var temp = this.canvasY;
+
+            // if(this.outOfBound(100,temp)) this.canvasY -=this.speed;
+            
             if(this.sheetX >= 576) {
                 this.sheetX =0;
             }
@@ -391,7 +402,13 @@ OBJ.prototype.goForward = function(dir) {
         if(this.lastDir == dir) {
             //console.log("yes");
             this.sheetX += 64;
-            this.canvasY +=this.speed;
+            var temp = this.canvasY;
+            temp+=this.speed + this.canvasHeight;
+            //var temp = -1;
+            if (temp < 750) {
+                console.log(temp);
+                this.canvasY +=this.speed;
+            }
             if(this.sheetX >= 576) {
                 this.sheetX =0;
             }
@@ -405,7 +422,13 @@ OBJ.prototype.goForward = function(dir) {
         if(this.lastDir == dir) {
             //console.log("yes");
             this.sheetX += 64;
-            this.canvasX -=this.speed;
+            var temp = this.canvasX;
+            temp-=this.speed;
+            //var temp = -1;
+            if (temp >-20) {
+                console.log(temp);
+                this.canvasX -=this.speed;
+            }
             if(this.sheetX >= 576) {
                 this.sheetX =0;
             }
@@ -419,7 +442,13 @@ OBJ.prototype.goForward = function(dir) {
         if(this.lastDir == dir) {
             //console.log("yes");
             this.sheetX += 64;
-            this.canvasX +=this.speed;
+            var temp = this.canvasX;
+            temp+=this.speed + this.canvasWidth;
+            //var temp = -1;
+            if (temp < 1410) {
+                console.log(temp);
+                this.canvasX +=this.speed;
+            }
             if(this.sheetX >= 576) {
                 this.sheetX =0;
             }
@@ -438,24 +467,33 @@ OBJ.prototype.update = function() {
 
 }
 
-OBJ.prototype.nextFrame = function(dir) {
-    switch(dir) {
-      case 'south':
-        this.canvasY += 3;
-        break;
-      case 'north':
-        this.canvasY -= 3;
-        break;
-      case 'west':
-        this.canvasX -= 3;
-        break;
-      case 'east':
-        this.canvasX += 3;
-        break;
-      default:
-        // code block
-    }
-}
+// OBJ.prototype.outOfBound = function(x ,y){
+
+//     if(x + this.speed >= 1430 || x - this.speed <= -30) return false;
+//     if(y + this.canvasHeight+ this.speed >= 750 || y - this.speed <= -30) return false;
+
+//     return true;
+        
+// }
+
+// OBJ.prototype.nextFrame = function(dir) {
+//     switch(dir) {
+//       case 'south':
+//         this.canvasY += 3;
+//         break;
+//       case 'north':
+//         this.canvasY -= 3;
+//         break;
+//       case 'west':
+//         this.canvasX -= 3;
+//         break;
+//       case 'east':
+//         this.canvasX += 3;
+//         break;
+//       default:
+//         // code block
+//     }
+// }
 
 OBJ.prototype.draw = function (ctx) {
     //console.log("inside draw");

@@ -82,7 +82,7 @@ GameEngine.prototype.startInput = function () {
         if(!that.keyDown.includes(e.keyCode))that.keyDown.push(e.keyCode);
         //if (e.code === "KeyW")         that.entities[that.entities.length-1].goForward(38); 
         //console.log(that.keyDown);
-        console.log("Key Down Event - Char " + e.code + " Code " + e.keyCode);
+        //console.log("Key Down Event - Char " + e.code + " Code " + e.keyCode);
     }, false);
 
     // this.ctx.canvas.addEventListener("keypress", function (e) {
@@ -102,7 +102,7 @@ GameEngine.prototype.startInput = function () {
     this.ctx.canvas.addEventListener("keyup", function (e) {
         that.keyDown.splice(that.keyDown.indexOf(e.keyCode),1);
         //console.log(e);
-        console.log("Key Up Event - Char " + e.code + " Code " + e.keyCode);
+        //console.log("Key Up Event - Char " + e.code + " Code " + e.keyCode);
     }, false);
 
     
@@ -110,7 +110,7 @@ GameEngine.prototype.startInput = function () {
     //console.log("XXXXXXXXXXXXXX");
         
         for(var i=0; i<that.keyDown.length; i++) {
-            console.log(that.keyDown[i]);
+            //console.log(that.keyDown[i]);
             if (that.keyDown[i] === 83)         that.entities[that.entities.length-2].goForward(40); 
             else if (that.keyDown[i] === 87)         that.entities[that.entities.length-2].goForward(38);
             else if (that.keyDown[i] === 65)         that.entities[that.entities.length-2].goForward(37); 
@@ -121,7 +121,7 @@ GameEngine.prototype.startInput = function () {
             else if (that.keyDown[i] === 39)         that.entities[that.entities.length-1].goForward(39);
         }
     };
-    setInterval(update,100);
+    setInterval(update,50);
 
 
     // console.log('Input started');

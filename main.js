@@ -1,52 +1,148 @@
+const GUN_FIRE_VOLUMN = 1.0;
+const BACKGROUND_MUSIC_VOLUMN = 0.5;
+const PLAYER_MAX_HP = 210;
+const ITEM_LIST = ["m9","akm","groza","awm","drink","firstaid","grenade"];
+var currentstage = "normal";
+var isPause = 0;
+var msg = "";
+var musicTrack;
+var gunFireTrack;
+var isGameOver = false;
+var currentlevel =1;
+var isMute = false;
+var playerName = 'saitama';
+
+
+var fastSkullSpot = [[0,0],[0,650],[1300,0],[1300,650]];
+
+var map;
+var supplySpotList = [];
+
+// weapon info
+const itemInfo = {
+
+    "m9": {
+        "speed": 25,
+        "damage": 15,
+        "range":700
+    },
+    "akm": {
+        "speed": 18,
+        "damage": 4,
+        "range":900
+    },
+    "groza": {
+        "speed": 30,
+        "damage": 1,
+        "range":550
+    },
+    "awm": {
+        "speed": 40,
+        "damage": 50,
+        "range":1400
+    },
+    "grenade": {
+        "damage": 100
+    },
+    "firstaid": {
+        "speed": 100
+    },
+    "drink": {
+        "speed": 6
+    }
+}
+
+// enemy stat
+const enemyStat = {
+    //level 1
+    "skullLevel1": {
+        "hp": 70
+    },
+    "skullFastLevel1": {
+        "hp": 20
+    },
+    "bossLevel1": {
+        "hp": 250
+    },
+
+    // levell 2
+    "skullLevel2": {
+        "hp": 100
+    },
+    "skullFastLevel2": {
+        "hp": 30
+    },   
+    "bossLevel2": {
+        "hp": 500
+    }, 
+
+    //level 3
+    "skullLevel3": {
+        "hp": 150
+    },
+    "skullFastLevel3": {
+        "hp": 40
+    },
+    "bossLevel3": {
+        "hp": 750
+    },    
+
+    // level 4
+    "skullLevel4": {
+        "hp": 200
+    },
+    "skullFastLevel4": {
+        "hp": 40
+    }, 
+    "bossLevel4": {
+        "hp": 1000
+    },
+    
+    //level 5
+    "skullLevel5": {
+        "hp": 250
+    },
+    "skullFastLevel5": {
+        "hp": 50
+    },
+    "bossLevel5": {
+        "hp": 1000
+    },
+    
+}
+
 var AM = new AssetManager();
 
-function Animation(spriteSheet, startX, startY, frameWidth, frameHeight, frameDuration, frames, loop, reverse) {
+function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale) {
     this.spriteSheet = spriteSheet;
-    this.startX = startX;
-    this.startY = startY;
     this.frameWidth = frameWidth;
     this.frameDuration = frameDuration;
     this.frameHeight = frameHeight;
+    this.sheetWidth = sheetWidth;
     this.frames = frames;
     this.totalTime = frameDuration * frames;
     this.elapsedTime = 0;
     this.loop = loop;
-    this.reverse = reverse;
+    this.scale = scale;
 }
 
-Animation.prototype.drawFrame = function (tick, ctx, x, y, scaleBy) {
-    var scaleBy = scaleBy || 1;
+Animation.prototype.drawFrame = function (tick, ctx, x, y) {
     this.elapsedTime += tick;
-    if (this.loop) {
-        if (this.isDone()) {
-            this.elapsedTime = 0;
-        }
-    } else if (this.isDone()) {
-        return;
+    if (this.isDone()) {
+        if (this.loop) this.elapsedTime = 0;
     }
-    var index = this.reverse ? this.frames - this.currentFrame() - 1 : this.currentFrame();
-    var vindex = 0;
+    var frame = this.currentFrame();
+    var xindex = 0;
+    var yindex = 0;
+    xindex = frame % this.sheetWidth;
+    yindex = Math.floor(frame / this.sheetWidth);
 
-    //console.log(this.spriteSheet.width);
-
-    if ((index + 1) * this.frameWidth + this.startX > this.spriteSheet.width) {
-        index -= Math.floor((this.spriteSheet.width - this.startX) / this.frameWidth);
-        vindex++;
-    }
-    while ((index + 1) * this.frameWidth > this.spriteSheet.width) {
-        index -= Math.floor(this.spriteSheet.width / this.frameWidth);
-        vindex++;
-    }
-
-    var locX = x;
-    var locY = y;
-    var offset = vindex === 0 ? this.startX : 0;
     ctx.drawImage(this.spriteSheet,
-                  index * this.frameWidth + offset, vindex * this.frameHeight + this.startY,  // source from sheet
-                  this.frameWidth, this.frameHeight,
-                  locX, locY,
-                  this.frameWidth * scaleBy,
-                  this.frameHeight * scaleBy);
+                 xindex * this.frameWidth, yindex * this.frameHeight,  // source from sheet
+                 this.frameWidth, this.frameHeight,
+                 x, y,
+                 this.frameWidth * this.scale,
+                 this.frameHeight * this.scale);
 }
 
 Animation.prototype.currentFrame = function () {
@@ -57,79 +153,12 @@ Animation.prototype.isDone = function () {
     return (this.elapsedTime >= this.totalTime);
 }
 
-// function Unicorn(game) {
-//     this.animation = new Animation(AM.getAsset("./img/runingman.png"), 0, 0, 165, 295, 0.05, 25, true, false);
-//     this.jumpAnimation = new Animation(AM.getAsset("./img/runingman.png"), 0, 885, 165, 295, 0.05, 28, false, false);
-//     this.jumping = false;
-//     this.radius = 100;
-//     this.ground = 400;
-//     Entity.call(this, game, 100, 400);
-// }
-
-// Unicorn.prototype = new Entity();
-// Unicorn.prototype.constructor = Unicorn;
-
-// Unicorn.prototype.update = function () {
-//     if (this.game.space) this.jumping = true;
-//     if (this.jumping) {
-//         if (this.jumpAnimation.isDone()) {
-//             this.jumpAnimation.elapsedTime = 0;
-//             this.jumping = false;
-//         }
-//         var jumpDistance = this.jumpAnimation.elapsedTime / this.jumpAnimation.totalTime;
-//         var totalHeight = 100;
-
-//         if (jumpDistance > 0.5)
-//             jumpDistance = 1 - jumpDistance;
-
-//         //var height = jumpDistance * 2 * totalHeight;
-//         var height = totalHeight*(-4 * (jumpDistance * jumpDistance - jumpDistance));
-//         this.y = this.ground - height;
-//     }
-//     Entity.prototype.update.call(this);
-// }
-
-// Unicorn.prototype.draw = function (ctx) {
-//     if (this.jumping) {
-//         this.jumpAnimation.drawFrame(this.game.clockTick, ctx, this.x, this.y,0.5);
-//     }
-//     else {
-//         this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y,0.5);
-//     }
-//     Entity.prototype.draw.call(this);
-// }
 
 
-
-
-
-
-
-// inheritance 
-// function Cheetah(game, spritesheet) {
-//     this.animation = new Animation(spritesheet, 165, 295, 12, 0.05, 26, true, 0.5);
-//     this.speed = 000;
-//     this.ctx = game.ctx;
-//     Entity.call(this, game, 100, 390);
-// }
-
-// Cheetah.prototype = new Entity();
-// Cheetah.prototype.constructor = Cheetah;
-
-// Cheetah.prototype.update = function () {
-//     this.x += this.game.clockTick * this.speed;
-//     if (this.x > 800) this.x = -230;
-//     Entity.prototype.update.call(this);
-// }
-
-// Cheetah.prototype.draw = function () {
-//     this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
-//     Entity.prototype.draw.call(this);
-// }
 
 
 // no inheritance
-function MovingBackground(game, spritesheet,thex,they, theimgwidth,theimgheight,speed) {
+function NotMovingElement(game, spritesheet,thex,they, theimgwidth,theimgheight,speed) {
     this.x = thex;
     this.y = they;
     this.myimgwidth = theimgwidth;
@@ -140,392 +169,336 @@ function MovingBackground(game, spritesheet,thex,they, theimgwidth,theimgheight,
     this.myspeed = speed;
 };
 
-MovingBackground.prototype.draw = function () {
+NotMovingElement.prototype.draw = function () {
     this.ctx.drawImage(this.spritesheet,
                    this.x, this.y,this.myimgwidth,this.myimgheight);
 };
 
-MovingBackground.prototype.update = function () {
-    //this.x-=this.myspeed;
-    if(this.x< -this.myimgwidth) this.x = 800;
+NotMovingElement.prototype.update = function () {
 };
 
 
-
-function Background(game) {
-    Entity.call(this, game, 0, 0);
-    this.r = 135;
-    this.b = 206;
-    this.g = 250;
-    this.radius = 200;
-    dayandnight = 1;
+  ////////Explosion
+function Heal(game, player) {
+    this.animation = new Animation(AM.getAsset("./img/heal.png")
+        , 185, 185, 5, 0.15, 20, false, 0.5);
+    //this.speed = speed;
+    //this.isMoving = isMoving;
+    this.player = player;
+    this.time=1;
+    this.width =185;
+    this.height = 185;
+    //this.dir = dir;
+    
+    Entity.call(this, game, player.x, player.y);
 }
 
-Background.prototype = new Entity();
-Background.prototype.constructor = Background;
+// Explosion.prototype = new Entity();
+// Explosion.prototype.constructor = Grass2;
 
-Background.prototype.update = function () {
-    this.r-=dayandnight;
-    this.b -=dayandnight;
-    this.g -=dayandnight;
+Heal.prototype.update = function () {
+    //console.log("draged");
+    this.time++;
+    // var pos = [37,38,39,40];
+    // this.dir = pos.random();
+    this.x = this.player.x;
+    this.y = this.player.y;
 
-    if(this.r <= 0 &&this.b <= 0 &&this.g <= 0) {
-        dayandnight = -1;
-    }
 
-    if(this.r >= 135 &&this.b >= 206 &&this.g >= 250) {
-        dayandnight = 1;
-    }
+    
+Heal.prototype.update.call(this);
 
-    Entity.prototype.update.call(this);
 }
 
-Background.prototype.draw = function (ctx) {
-    ctx.fillStyle = "rgb("+ this.r+","+ this.b+","+this.g+")";
-    ctx.fillRect(0,0,1400,750);
-    //ctx.drawImage(bgImg,0,0);
+Heal.prototype.draw = function (ctx) {
+    
+    this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
     Entity.prototype.draw.call(this);
 }
 
-function Gound(game, spritesheet) {
-    this.x = 0;
-    this.y = 400;
-    this.spritesheet = spritesheet;
-    this.game = game;
-    this.ctx = game.ctx;
-
-};
-
-Gound.prototype.draw = function () {
-    this.ctx.drawImage(this.spritesheet,
-                   this.x, this.y);
-};
-
-Gound.prototype.update = function () {
-    // this.x-=this.myspeed;
-    // if(this.x< -this.myimgwidth) this.x = 800;
-};
 
 
 
 // no inheritance
-function Sun(game, spritesheet,thex,they, theimgwidth,theimgheight,speed) {
+function Item(game, src,thex,they, theimgwidth,theimgheight,dmg,heal, itemName) {
     this.x = thex;
     this.y = they;
     this.myimgwidth = theimgwidth;
     this.myimgheight = theimgheight;
-    this.spritesheet = spritesheet;
+    this.spritesheet = AM.getAsset(src);
+    this.src =src;
     this.game = game;
     this.ctx = game.ctx;
-    this.myspeed = speed;
+    this.dmg = dmg;
+    this.heal = heal;
+    this.itemName = itemName;
+    this.trans = 0.5;
+    this.change = 0.01;
 };
 
-Sun.prototype.draw = function () {
+Item.prototype.draw = function () {
+    this.ctx.beginPath();
+    this.ctx.lineWidth = "2";
+    if(this.trans >= 1) {
+        this.change = -this.change;
+    }else if (this.trans <= 0.2){
+        this.change = -this.change;
+    }
+    this.trans += this.change;
+    //console.log(this.trans);
+    this.ctx.fillStyle = "rgba(205,255,0,"+this.trans+")";
+    this.ctx.fillRect(this.x, this.y, this.myimgwidth, this.myimgheight);
+    this.ctx.strokeStyle = "rgba(205,255,0,1)";
+    this.ctx.rect(this.x, this.y, this.myimgwidth, this.myimgheight);
+    this.ctx.stroke();
+
     this.ctx.drawImage(this.spritesheet,
                    this.x, this.y,this.myimgwidth,this.myimgheight);
 };
 
-Sun.prototype.update = function () {
-    this.y+=this.myspeed;
-    if(this.y>  550) this.y = -200;
-
-    this.x+=this.myspeed;
-    if(this.x> 800) this.x = -300;
+Item.prototype.update = function () {
 };
 
+//For circle bullet boss
+function FireCircle(game, spritesheet,xval,yval
+    , frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale,speed, angle) {
 
-
-
-function Fire(game) {
-    this.animation = new Animation(AM.getAsset("./img/fire.png"), 0, 0, 64, 128, 0.05, 32, true, false);
-    //this.jumpAnimation = new Animation(AM.getAsset("./img/fire.png"), 0, 885, 165, 295, 0.05, 28, false, false);
-    this.jumping = false;
-    this.radius = 100;
-    this.ground = 100;
-    Entity.call(this, game, 500, 370);
-}
-
-Fire.prototype = new Entity();
-Fire.prototype.constructor = Fire;
-
-Fire.prototype.update = function () {
-    this.x -= 3;
-    if (this.x < -64) this.x = 864;
-    Entity.prototype.update.call(this);
-}
-
-Fire.prototype.draw = function (ctx) {
-    this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y,1.5);
-    Entity.prototype.draw.call(this);
-}
-
-
-
-// no inheritance
-function Land(game, spritesheet
-    ,thex,they, theimgwidth,theimgheight
-    ,sheetX, sheetY, sheetW, sheetH) {
-    this.x = thex;
-    this.y = they;
-    this.myimgwidth = theimgwidth;
-    this.myimgheight = theimgheight;
-    this.spritesheet = spritesheet;
-    this.game = game;
+    this.animation = new Animation(spritesheet
+        , frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale);
+    this.speed = speed;
+    //this.isMoving = isMoving;
     this.ctx = game.ctx;
-
-
-    this.sheetX = sheetX;
-    this.sheetY = sheetY;
-    this.sheetW = sheetW;
-    this.sheetH = sheetH;
-
-    //this.myspeed = speed;
-};
-
-Land.prototype.draw = function () {
-    this.ctx.drawImage(this.spritesheet,
-                   this.x, this.y,this.myimgwidth,this.myimgheight,
-                   this.sheetX, this.sheetY,this.sheetW,this.sheetH);
-};
-
-Land.prototype.update = function () {
-    // this.y+=this.myspeed;
-    // if(this.y>  550) this.y = -200;
-
-    // this.x+=this.myspeed;
-    // if(this.x> 800) this.x = -300;
-};
-
-
-
-
-
-
-
-function Player(game) {
-    this.animation = new Animation(AM.getAsset("./img/sk.png"), 64, 0, 64, 64, 0.05, 1, true, false);
-
-    this.northanimation = new Animation(AM.getAsset("./img/sk.png"), 64, 0, 64, 64, 0.05, 8, true, false);
-
-    this.jumpAnimation = new Animation(AM.getAsset("./img/runingman.png"), 0, 885, 165, 295, 0.05, 28, false, false);
-    this.jumping = false;
-    this.north = false;
+    this.time=1;
+    this.width =20;
+    this.height = 20;
+    this.bossxval = xval;
+    this.bossyval = yval;
+    this.angle = angle;
+    this.fireshoot = true;
+    this.firenumber = 0;
     this.radius = 100;
-    this.ground = 400;
-    Entity.call(this, game, 100, 400);
+    this.scale= scale;
+    this.name = 999;
+   
+    
+    Entity.call(this, game, xval, yval);
 }
 
-Player.prototype = new Entity();
-Player.prototype.constructor = Player;
 
-Player.prototype.update = function () {
-    if (this.game.space) this.jumping = true;
-    if (this.jumping) {
-        if (this.jumpAnimation.isDone()) {
-            this.jumpAnimation.elapsedTime = 0;
-            this.jumping = false;
-        }
-        var jumpDistance = this.jumpAnimation.elapsedTime / this.jumpAnimation.totalTime;
-        var totalHeight = 100;
 
-        if (jumpDistance > 0.5)
-            jumpDistance = 1 - jumpDistance;
+FireCircle.prototype.update = function () {
+    
+    this.angle +=2;
+    if (this.angle>359) this.angle=0;
+    let timeClock = Math.floor(this.game.timer.gameTime);
+    // console.log("from firecircle;");
+if(timeClock%5 == 3 || timeClock%5 == 4){
+    // this.firenumber++;
+    this.animation.scale +=0.01; 
+    this.scale = this.animation.scale;
+    this.width +=5;
+    this.height = 5;
+this.radius +=5;
+if(this.game.AIList.length>0){
+    this.x = this.game.AIList[0].x+10 + (this.radius) * Math.cos(this.angle* Math.PI / 180);
+ this.y = this.game.AIList[0].y+40 + (this.radius) * Math.sin(this.angle * Math.PI / 180);
 
-        //var height = jumpDistance * 2 * totalHeight;
-        var height = totalHeight*(-4 * (jumpDistance * jumpDistance - jumpDistance));
-        this.y = this.ground - height;
-    } 
+}
+
+}else {
+    if(this.game.AIList.length>0){
+    // this.firenumber = 0;
+    this.animation.scale =0.5;
+    this.radius=100;
+    this.width =20;
+    this.height = 20;
+ this.x = this.game.AIList[0].x+10 + this.radius * Math.cos(this.angle* Math.PI / 180);
+ this.y = this.game.AIList[0].y+40 + this.radius * Math.sin(this.angle * Math.PI / 180);
+    }
+}
+if(this.game.AIList.length>0){
+    this.game.AIList[0].bossBulletFire = false;
+    
     Entity.prototype.update.call(this);
 }
+}
 
-Player.prototype.draw = function (ctx) {
-    // if (this.jumping) {
-    //     this.jumpAnimation.drawFrame(this.game.clockTick, ctx, this.x, this.y,1);
-    // }
-    // else {
-    //     this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y,1.5);
-    // }
-    if (this.north) {
-        this.northnimation.drawFrame(this.game.clockTick, ctx, this.x, this.y,1);
-    }
-    else {
-        this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y,1.5);
-    }
+FireCircle.prototype.draw = function (ctx) {
+    
+    this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
     Entity.prototype.draw.call(this);
 }
 
+Array.prototype.random = function () {
+    return this[Math.floor((Math.random()*this.length))];
+  }
 
 
-function OBJ(sx,sy,sw,sh,cx,cy,cw,ch,img) {
-    this.sheetX = sx;
-    this.sheetY = sy;
-    this.sheetWidth = sw;
-    this.sheetHeight = sh;
-    this.canvasX = cx;
-    this.canvasY = cy;
-    this.canvasWidth = cw;
-    this.canvasHeight = ch;
-    this.img =img;
-    this.lastDir = 38;
-    this.speed = 15;
+  ////////Explosion
+function Explosion(game, spritesheet,xval,yval
+    , dir, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale,speed, owner) {
+    this.animation = new Animation(spritesheet
+        , frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale);
+    this.speed = speed;
+    //this.isMoving = isMoving;
+    this.ctx = game.ctx;
+    this.time=1;
+    this.width =100;
+    this.height = 100;
+    this.dir = dir;
+    this.owner = owner;
+    Entity.call(this, game, xval, yval);
 }
 
-OBJ.prototype.goForward = function(dir) {
-    //console.log("go");
-    switch(dir) {
-      case 38:
-        if(this.lastDir == dir) {
-            //console.log("yes");
-            this.sheetX += 64;
+// Explosion.prototype = new Entity();
+// Explosion.prototype.constructor = Grass2;
 
-            var temp = this.canvasY;
-            temp-=this.speed;
-            //var temp = -1;
-            if (temp >-30) {
-                console.log(temp);
-                this.canvasY -=this.speed;
-            }
-            // var temp = this.canvasY;
+Explosion.prototype.update = function () {
 
-            // if(this.outOfBound(100,temp)) this.canvasY -=this.speed;
-            
-            if(this.sheetX >= 576) {
-                this.sheetX =0;
-            }
-        } else {
-            this.sheetX = 0;
-            this.sheetY = 0;
-            this.lastDir =dir;
-        }
-        break;
-      case 40:
-        if(this.lastDir == dir) {
-            //console.log("yes");
-            this.sheetX += 64;
-            var temp = this.canvasY;
-            temp+=this.speed + this.canvasHeight;
-            //var temp = -1;
-            if (temp < 750) {
-                console.log(temp);
-                this.canvasY +=this.speed;
-            }
-            if(this.sheetX >= 576) {
-                this.sheetX =0;
-            }
-        } else {
-            this.sheetX = 0;
-            this.sheetY = 128;
-            this.lastDir =dir;
-        }
-        break;
-      case 37:
-        if(this.lastDir == dir) {
-            //console.log("yes");
-            this.sheetX += 64;
-            var temp = this.canvasX;
-            temp-=this.speed;
-            //var temp = -1;
-            if (temp >-20) {
-                console.log(temp);
-                this.canvasX -=this.speed;
-            }
-            if(this.sheetX >= 576) {
-                this.sheetX =0;
-            }
-        } else {
-            this.sheetX = 0;
-            this.sheetY = 64;
-            this.lastDir =dir;
-        }
-        break;
-      case 39:
-        if(this.lastDir == dir) {
-            //console.log("yes");
-            this.sheetX += 64;
-            var temp = this.canvasX;
-            temp+=this.speed + this.canvasWidth;
-            //var temp = -1;
-            if (temp < 1410) {
-                console.log(temp);
-                this.canvasX +=this.speed;
-            }
-            if(this.sheetX >= 576) {
-                this.sheetX =0;
-            }
-        } else {
-            this.sheetX = 0;
-            this.sheetY = 192;
-            this.lastDir =dir;
-        }
-        break;
-      default:
-        // code block
+    if(this.owner != null) {
+        this.x = this.owner.x-25;
+        this.y = this.owner.y -90;
+        this.time++;
+        return;
     }
+    //console.log("draged");
+    this.time++;
+    // var pos = [37,38,39,40];
+    // this.dir = pos.random();
+    if(this.speed !=0) {
+        if(this.dir === 37 ) {
+        this.x += -this.speed;
+    } else if(this.dir === 38) {
+        this.y += -this.speed;
+    } else if(this.dir === 39) {
+        this.x += this.speed;
+    } else if(this.dir == 40){
+        this.y += this.speed;
+    }else if(this.dir === 3738) {
+        this.x += -this.speed;
+        this.y += -this.speed;
+    } else if(this.dir==37380){
+        this.x +=-this.speed;
+        this.y+=-this.speed/2;
+    }else if(this.dir === 3839){
+        this.x += this.speed;
+        this.y += -this.speed;
+    }else if(this.dir ===3940) {
+        this.x += this.speed;
+        this.y += this.speed;
+    } else if(this.dir === 4037){
+        this.y += this.speed;
+        this.x += -this.speed;
+    } else if(this.dir==39400){
+        this.y +=this.speed/2;
+        this.x +=this.speed;
+    }else if(this.dir==38390){
+        this.y -=this.speed/2;
+        this.x +=this.speed;
+    }else if(this.dir==37400){
+        this.x -= this.speed;
+        this.y +=this.speed/2;
+    }else if(this.dir==373800){
+        this.y -=this.speed;
+        this.x -=this.speed/2;
+    }else if(this.dir==383900){
+        this.x += this.speed/2;
+        this.y -=this.speed;
+    }else if(this.dir==403700){
+        this.y +=this.speed;
+        this.x -=this.speed/2;
+    }else if(this.dir==403900){
+        this.x += this.speed/2;
+        this.y +=this.speed;
+    }else if(this.dir==0){
+        this.x += Math.cos(this.game.exactAngle) * this.speed;
+        this.y += Math.sin(this.game.exactAngle) * this.speed;
+    }else{
+        console.log("no dir:" + this.dir);
+    }
+
+    // (403700,403900)
+}
+    
+    Entity.prototype.update.call(this);
 }
 
-OBJ.prototype.update = function() {
-
+Explosion.prototype.draw = function (ctx) {
+    
+    this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
+    Entity.prototype.draw.call(this);
 }
 
-// OBJ.prototype.outOfBound = function(x ,y){
-
-//     if(x + this.speed >= 1430 || x - this.speed <= -30) return false;
-//     if(y + this.canvasHeight+ this.speed >= 750 || y - this.speed <= -30) return false;
-
-//     return true;
-        
-// }
-
-// OBJ.prototype.nextFrame = function(dir) {
-//     switch(dir) {
-//       case 'south':
-//         this.canvasY += 3;
-//         break;
-//       case 'north':
-//         this.canvasY -= 3;
-//         break;
-//       case 'west':
-//         this.canvasX -= 3;
-//         break;
-//       case 'east':
-//         this.canvasX += 3;
-//         break;
-//       default:
-//         // code block
-//     }
-// }
-
-OBJ.prototype.draw = function (ctx) {
-    //console.log("inside draw");
-    ctx.drawImage(this.img,
-        this.sheetX, this.sheetY,  // source from sheet
-        this.sheetWidth, this.sheetHeight, // width and height of source
-        this.canvasX, this.canvasY, // destination coordinates
-        this.canvasWidth, this.canvasHeight); // destination width and height
+  ////////Explosion
+  function Grenade(game, spritesheet,xval,yval, dir) {
+    this.animation = new Animation(spritesheet, 27, 31, 11, 0.1, 11, false, 1.2);
+    this.speed = 5;
+    this.ctx = game.ctx;
+    this.time=1;
+    this.width =100;
+    this.height = 100;
+    this.dir = dir;
+    Entity.call(this, game, xval, yval);
 }
 
+// Explosion.prototype = new Entity();
+// Explosion.prototype.constructor = Grass2;
+
+Grenade.prototype.update = function () {
+    // if(this.animation.isDone()) {
+    //     console.log("drawed")
+    //     this.game.BombList.push(new Explosion(this.game
+    //         ,AM.getAsset("./img/explosion.png"),this.x,this.y, this.lastDir
+    //         , 100, 100, 5, 0.15, 11, false, 0.9, false));
+
+    // }
+    //console.log("draged");
+    this.time++;
+    // console.log(this.time);
 
 
+    // var pos = [37,38,39,40];
+    // this.dir = pos.random();
+    if(this.dir === 37 ) {
+        this.x += -this.speed;
+        if(this.time == 50) {
+            this.game.dmganimationList.push(new Explosion(this.game
+                ,AM.getAsset("./img/explosion.png"),this.x-100,this.y-70, this.lastDir
+                , 96, 96, 5, 0.05, 15, false, 1.5, 0));
+        }
+    } else if(this.dir === 38) {
+        this.y += -this.speed;
+        if(this.time == 50) {
+            this.game.dmganimationList.push(new Explosion(this.game
+                ,AM.getAsset("./img/explosion.png"),this.x-50,this.y-100, this.lastDir
+                , 96, 96, 5, 0.05, 15, false, 1.5, 0));
+        }
+    } else if(this.dir === 39) {
+        this.x += this.speed;
+        if(this.time == 50) {
+            this.game.dmganimationList.push(new Explosion(this.game
+                ,AM.getAsset("./img/explosion.png"),this.x+50,this.y-70, this.lastDir
+                , 96, 96, 5, 0.05, 15, false, 1.5, 0));
+        }
+    } else {
+        this.y += this.speed;
+        if(this.time == 50) {
+            this.game.dmganimationList.push(new Explosion(this.game
+                ,AM.getAsset("./img/explosion.png"),this.x-50,this.y+35, this.lastDir
+                , 96, 96, 5, 0.05, 15, false, 1.5, 0));
+        }
+    }
+    
+    Entity.prototype.update.call(this);
+}
 
+Grenade.prototype.draw = function (ctx) {
+    
+    this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
+    Entity.prototype.draw.call(this);
+}
 
-
-AM.queueDownload("./img/RobotUnicorn.png");
-AM.queueDownload("./img/guy.jpg");
-AM.queueDownload("./img/mushroomdude.png");
-AM.queueDownload("./img/runningcat.png");
-AM.queueDownload("./img/background.jpg");
-AM.queueDownload("./img/runingman.png");
-AM.queueDownload("./img/tree1.png");
-AM.queueDownload("./img/tree2.png");
-AM.queueDownload("./img/mountain.png");
-AM.queueDownload("./img/gound.png");
-AM.queueDownload("./img/sun.png");
-AM.queueDownload("./img/fire.png");
-AM.queueDownload("./img/grass.png");
-AM.queueDownload("./img/suitMan.png");
-
-
-AM.queueDownload("./img/416.png");
+AM.queueDownload("./img/normal2.png");
 AM.queueDownload("./img/akm.png");
 AM.queueDownload("./img/drink.png");
 AM.queueDownload("./img/firstaid.png");
@@ -534,231 +507,415 @@ AM.queueDownload("./img/groza.png");
 AM.queueDownload("./img/m9.png");
 AM.queueDownload("./img/painkiller.png");
 
+AM.queueDownload("./img/stone.png");
 AM.queueDownload("./img/bush.png");
-AM.queueDownload("./img/land.png");
+AM.queueDownload("./img/circlestone.png");
+AM.queueDownload("./img/flowers.png");
 
 AM.queueDownload("./img/sk.png");
+AM.queueDownload("./img/skfast.png");
+AM.queueDownload("./img/skboss.png");
+AM.queueDownload("./img/boss.png");
+
+AM.queueDownload("./img/bullet.png");
+AM.queueDownload("./img/circleBullet.png");
+
+AM.queueDownload("./img/tree.png");
+AM.queueDownload("./img/fin.png");
+AM.queueDownload("./img/saitama.png");
+AM.queueDownload("./img/arjun.png");
+AM.queueDownload("./img/finIcon.png");
+AM.queueDownload("./img/saitamaIcon.png");
+AM.queueDownload("./img/arjunIcon.png");
+AM.queueDownload("./img/awm.png");
+AM.queueDownload("./img/greendmg.png");
+AM.queueDownload("./img/greendmg2.png");
+AM.queueDownload("./img/purpledmg.png");
+AM.queueDownload("./img/fire.png");
+AM.queueDownload("./img/grenademotion.png");
+AM.queueDownload("./img/explosion.png");
+
+AM.queueDownload("./img/disappear.png");
+
+AM.queueDownload("./img/goldBoss.png");
+
+AM.queueDownload("./img/trash.png");
+AM.queueDownload("./img/monstersfire.png");
+AM.queueDownload("./img/little.png");
+
+AM.queueDownload("./img/heal.png");
+
+AM.queueDownload("./img/longbullet.png");
+AM.queueDownload("./img/longbullet2.png");
+AM.queueDownload("./img/midbullet.png");
+AM.queueDownload("./img/blackskull.png");
+
+
+AM.queueDownload("./img/alien.png");
+AM.queueDownload("./img/bush2.png");
+AM.queueDownload("./img/bush3.png");
+AM.queueDownload("./img/house.png");
 
 
 
 
 
-var bgname = "./img/bg3.png";
-
-AM.queueDownload(bgname);
-
-AM.downloadAll(function () {
-    var canvas = document.getElementById("gameWorld");
-    var ctx = canvas.getContext("2d");
-    //canvas.style.backgroundColor
-
-    var gameEngine = new GameEngine();
-    gameEngine.init(ctx);
 
 
+//var bgname = "./img/level1bg.png";
+
+AM.queueDownload("./img/level1bg.png");
+AM.queueDownload("./img/level2bg.png");
+AM.queueDownload("./img/level3bg.png");
+AM.queueDownload("./img/level4bg.png");
+AM.queueDownload("./img/level5bg.png");
 
 
+function start() {
+    
+    AM.downloadAll(function () {
+        // isDead = false;
+        // console.log("we are at level" +currentlevel++);
 
-    gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset(bgname),0,0,1400,750,1));
+        var canvas = document.getElementById("gameWorld");
+        var ctx = canvas.getContext("2d");
+        //canvas.style.backgroundColor
+    
+        var gameEngine = new GameEngine();
+        gameEngine.init(ctx);
+    
+       // tree
+        gameEngine.wall.push(new NotMovingElement(gameEngine, AM.getAsset("./img/level1bg.png"),-20,0,20,750,1));
 
-    // var player = new Player(gameEngine);
-    // gameEngine.addEntity(player);
+        gameEngine.wall.push(new NotMovingElement(gameEngine, AM.getAsset("./img/level1bg.png"),0,-20,1400,20,1));
 
+        gameEngine.wall.push(new NotMovingElement(gameEngine, AM.getAsset("./img/level1bg.png"),0,750,1400,20,1));
 
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/416.png"),50,50,50,50,1));
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/akm.png"),100,100,50,50,1));
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/drink.png"),150,150,50,50,1));
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/firstaid.png"),200,200,50,50,1));
+        gameEngine.wall.push(new NotMovingElement(gameEngine, AM.getAsset("./img/level1bg.png"),1400,0,20,750,1));
 
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/grenade.png"),250,250,50,50,1));
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/groza.png"),300,300,50,50,1));
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/m9.png"),350,350,50,50,1));
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/painkiller.png"),400,400,50,50,1));
+        gameEngine.playerList.push(new Player
+            (gameEngine,15,138,34,52,0,650,51,78,AM.getAsset("./img/"+playerName+".png"), "player1", playerName));
 
-
-    var glasssize = 90;
-
-
-
-
-gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
-    ,353,288,94,94
-    ,0,660,glasssize,glasssize));
-
-        gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
-        ,353,288,94,94
-        ,1310,660,glasssize,glasssize));
-
-        gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
-        ,353,288,94,94
-        ,0,0,glasssize,glasssize));
-
-        gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
-        ,353,288,94,94
-        ,1310,0,glasssize,glasssize));
-
-
-
-    for(var i=0; i<28 ; i++) {
-        gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
-        ,381,290,40,94
-        ,47 + 47*i,0,47,glasssize));
-    }
-
-
-
-
-    for(var i=0; i<28 ; i++) {
-        gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
-        ,381,290,40,94
-        ,47 + 47*i,660,47,glasssize));
-    }
-
-    for(var i=0; i<13 ; i++) {
-        gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
-        ,353,330,94,36
-        ,0,73 + 47*i,glasssize,48));
-    }
-
-    for(var i=0; i<13 ; i++) {
-        gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
-        ,353,330,94,36
-        ,1310,73 + 47*i,glasssize,48));
-    }
-
-    // for(var i=0; i<28 ; i++) {
-    //     gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
-    //     ,381,290,40,94
-    //     ,47 + 47*i,650,47,glasssize));
-    // }
-
-    //     for(var j=0; j<15 ; j++) {
-    //         gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png"),448,128,63,62,0 + 63*i,0+62*j,63,62));
-    //     }
-    // }
-
-    for(var i=0; i<27 ; i++) {
-        gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
-        ,381,290,40,94
-        ,60+47*i,300,47,glasssize));
-    }
-
-
-
-    //tree
-
-
-    for(var i=0; i<6 ; i++) {
-        gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
-        ,225,417,63,93
-        ,70 + 55 * i,60,63,93));
-    }
-
-    for(var i=0; i<3 ; i++) {
-        gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
-        ,225,417,63,93
-        ,70, 60 + 60 * i,63,93));
-    }
-
-    for(var i=0; i<2 ; i++) {
-        gameEngine.addEntity(new Land(gameEngine, AM.getAsset("./img/land.png")
-        ,225,417,63,93
-        ,400, 60 + 60 * i,63,93));
-    }
-
-
-
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/mountain.png"),200,100,600,400,1));
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/mountain.png"),400,0,800,506,1));
-
-    // //gameEngine.addEntity(new Gound(gameEngine, AM.getAsset("./img/gound.png")));
-
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/gound.png"),
-    // 1788,400,1788,300,2));
-
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/gound.png"),
-    // 0,400,1788,300,2));
-
-
-
-        gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/416.png"),300,150,50,50,1));
-    gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/akm.png"),300,200,50,50,1));
-    gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/drink.png"),150,150,50,50,1));
-    gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/firstaid.png"),200,150,50,50,1));
-
-    gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/grenade.png"),250,150,50,50,1));
-    gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/groza.png"),300,250,50,50,1));
-    gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/m9.png"),350,150,50,50,1));
-    gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/painkiller.png"),150,200,50,50,1));
-
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/tree1.png"),
-    // 200,300,200,200,2));
-
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/tree1.png"),
-    // 400,300,200,200,2));
-
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/tree1.png"),
-    // 700,350,150,150,2));
-
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/tree2.png"),
-    // 500,310,200,200,2));
-
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/tree2.png"),
-    // 100,300,200,200,2));
-
-    // gameEngine.addEntity(new MovingBackground(gameEngine, AM.getAsset("./img/tree2.png"),
-    // 800,200,300,300,2));
-
-    // gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/tree2.png"),100,230,200,340,3));
-    // gameEngine.addEntity(new MushroomDude(gameEngine, AM.getAsset("./img/mountain.png")));
+        startNextLevel(gameEngine);
 
     
-    //gameEngine.addEntity(unicorn);
-    // var player = new OBJ(gameEngine);
-    // gameEngine.addEntity(player);
+        // for(var i =0; i<5; i++) {
+        //     gameEngine.AIList.push(new AI
+        //         (gameEngine,15,138,34,52,400,300,51,78,AM.getAsset("./img/sk.png"),1, 50,2));
+        //  }
+    
+    
+        // gameEngine.addEntity(new Guy(gameEngine, AM.getAsset("./img/guy.jpg")));
+    
+        gameEngine.start();
+        console.log("All Done!");
+    });
+}
 
-    //var fire = new Fire(gameEngine);
-    gameEngine.addEntity(new OBJ(0,0,64,64,100,100,100,100,AM.getAsset("./img/sk.png")));
+function dropSupply(gameEngine) {
+    supplySpotList = [];
+
+    for(var i = 0; i< map.length; i++){
+        for(var j = 0; j< map[i].length; j++){
+            if(map[i][j] ==0) supplySpotList.push([i,j]);
+        }   
+    }
 
 
-    gameEngine.addEntity(new OBJ(0,0,64,64,100,100,100,100,AM.getAsset("./img/suitMan.png")));
-    //gameEngine.addEntity(new Guy(gameEngine, AM.getAsset("./img/guy.jpg")));
 
-    gameEngine.start();
-    console.log("All Done!");
-});
+    for(var i = 0; i<10; i++) {
 
-// var keysDown = {};
-// try {
-//     if (window.addEventListener) {
-//         window.addEventListener("keydown", function (v) {keysDown[v.keyCode] = true;}, false);
-//         window.addEventListener("keyup", function (v) {delete keysDown[v.keyCode];}, false);
-//     } else if (document.attachEvent) {
-//         document.attachEvent("onkeydown", function (v) {keysDown[v.keyCode] = true;});
-//         document.attachEvent("onkeyup", function (v) {delete keysDown[v.keyCode];});
-//     } else if (window.attachEvent) {
-//         window.attachEvent("onkeydown", function (v) {keysDown[v.keyCode] = true;});
-//         window.attachEvent("onkeyup", function (v) {delete keysDown[v.keyCode];});
-//     } else {
-//         document.addEventListener("keydown", function (v) {keysDown[v.keyCode] = true;}, false);
-//         document.addEventListener("keyup", function (v) {delete keysDown[v.keyCode];}, false);
-//     }
-// } catch (e) {
-//     alert("Keys don't work!\nError: "+e);
-// }
 
-// var update = function () {
-//     if (38 in keysDown) { // Player holding up
-//         console.log("Key Up Event - Char " );
-//     }
-//     if (40 in keysDown) { // Player holding down
-       
-//     }
-//     if (37 in keysDown) { // Player holding left
-       
-//     }
-//     if (39 in keysDown) { // Player holding right
+
+        var item = ITEM_LIST[Math.floor(Math.random()* 7)];
+        var spot = supplySpotList.random();
+        gameEngine.supplyList.push(new Item(
+            gameEngine,
+             "./img/"+item+".png",
+             spot[1] * 70,
+             spot[0] * 75,
+             40,
+             40,
+             5,
+             0,
+             item));
+         //console.log(spot[1]  + ", " +spot[0] );
+    }
+}
+
+function startNextLevel(gameEngine) {
+    stopMusic();
+    playMusic("normal");
+
+    if(currentlevel == 1) {
+        gameEngine.addEntity(new NotMovingElement(gameEngine, AM.getAsset("./img/level1bg.png"),0,0,1400,750,1));
         
-//     }
-// };
-// setInterval(update,10);
+        map = [
+
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,5,5,6,5,5,5,5,0,5,5,5,5,0,5,5,5,5,5,0],
+            
+                        [0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0],
+            
+                        [0,5,0,0,0,0,0,8,8,8,8,0,0,0,0,0,0,0,5,0],
+            
+                        [0,0,0,0,0,0,0,8,8,8,8,0,0,0,0,0,0,0,0,0],
+            
+                        [0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0],
+            
+                        [0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0],
+            
+                        [0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0],
+            
+                        [0,5,5,5,5,5,5,5,5,0,7,7,7,7,0,5,5,5,5,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+            
+            
+                    ]
+            gameEngine.playerList[0].x = 700;
+            gameEngine.playerList[0].y = 0;
+            for(var i =0; i<3; i++) {
+                gameEngine.AIList.push(new AI
+                    (gameEngine,15,138,34,52,400,300,51,78,AM.getAsset("./img/sk.png"),1, enemyStat.skullLevel1.hp,2));
+            }
+            for(var i =0; i<3; i++) {
+                gameEngine.AIList.push(new AI
+                    (gameEngine,15,138,34,52,1200,300,51,78,AM.getAsset("./img/sk.png"),1, enemyStat.skullLevel1.hp,2));
+            }
+        
+    } else if (currentlevel == 4) {
+        gameEngine.addEntity(new NotMovingElement(gameEngine, AM.getAsset("./img/level4bg.png"),0,0,1400,750,1));
+        map = [
+
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,0,9,9,9,0,0,9,9,0,0,9,9,0,0,9,9,9,0,0],
+            
+                        [0,0,9,9,9,0,0,9,9,0,0,9,9,0,0,9,9,9,0,0],
+            
+                        [0,0,9,9,9,0,0,9,9,0,0,9,9,0,0,9,9,9,0,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,0,9,9,9,0,0,9,9,0,0,9,9,0,0,9,9,9,0,0],
+            
+                        [0,0,9,9,9,0,0,9,9,0,0,9,9,0,0,9,9,9,0,0],
+            
+                        [0,0,9,9,9,0,0,9,9,0,0,9,9,0,0,9,9,9,0,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+
+            
+            
+            
+                    ]
+            gameEngine.playerList[0].x = 960;
+            gameEngine.playerList[0].y = 660;
+
+            for(var i =0; i<5; i++) {
+                gameEngine.AIList.push(new AI
+                    (gameEngine,15,138,34,52,700,0,51,78,AM.getAsset("./img/sk.png"),1, enemyStat.skullLevel4.hp,2));
+            }
+            for(var i =0; i<5; i++) {
+                gameEngine.AIList.push(new AI
+                    (gameEngine,15,138,34,52,700,650,51,78,AM.getAsset("./img/normal2.png"),1.2, enemyStat.skullLevel4.hp,2));
+            }
+         
+    } else if (currentlevel == 3) {
+        gameEngine.addEntity(new NotMovingElement(gameEngine, AM.getAsset("./img/level3bg.png"),0,0,1400,750,1));
+
+        map = [
+
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,0,4,4,4,0,0,4,4,0,0,4,4,0,0,4,4,4,0,0],
+            
+                        [0,0,4,4,4,0,0,4,4,0,0,4,4,0,0,4,4,4,0,0],
+            
+                        [0,0,4,4,4,0,0,4,4,0,0,4,4,0,0,4,4,4,0,0],
+            
+                        [0,0,4,4,4,0,0,4,4,0,0,4,4,0,0,4,4,4,0,0],
+            
+                        [0,0,4,4,4,0,0,4,4,0,0,4,4,0,0,4,4,4,0,0],
+            
+                        [0,0,4,4,4,0,0,4,4,0,0,4,4,0,0,4,4,4,0,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+   
+            
+                    ]
+            gameEngine.playerList[0].x = 960;
+            gameEngine.playerList[0].y = 660;
+
+            for(var i =0; i<4; i++) {
+                gameEngine.AIList.push(new AI
+                    (gameEngine,15,138,34,52,400,0,51,78,AM.getAsset("./img/sk.png"),1, enemyStat.skullLevel3.hp,2));
+            }
+            for(var i =0; i<4; i++) {
+                gameEngine.AIList.push(new AI
+                    (gameEngine,15,138,34,52,400,650,51,78,AM.getAsset("./img/normal2.png"),1.2, enemyStat.skullLevel3.hp,2));
+            }
+            
+    } else if (currentlevel == 2) {
+        gameEngine.addEntity(new NotMovingElement(gameEngine, AM.getAsset("./img/level2bg.png"),0,0,1400,750,1));
+
+        map = [
+
+                        
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [1,1,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,1,1],
+            
+                        [0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0],
+            
+                        [0,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+            
+            
+            
+                    ]
+            gameEngine.playerList[0].x = 960;
+            gameEngine.playerList[0].y = 660;
+            for(var i =0; i<3; i++) {
+                gameEngine.AIList.push(new AI
+                    (gameEngine,15,138,34,52,400,0,51,78,AM.getAsset("./img/normal2.png"),1.2, enemyStat.skullLevel2.hp,2));
+            }
+            for(var i =0; i<3; i++) {
+                gameEngine.AIList.push(new AI
+                    (gameEngine,15,138,34,52,400,300,51,78,AM.getAsset("./img/normal2.png"),1.2, enemyStat.skullLevel2.hp,2));
+            }
+            for(var i =0; i<3; i++) {
+                gameEngine.AIList.push(new AI
+                    (gameEngine,15,138,34,52,400,600,51,78,AM.getAsset("./img/normal2.png"),1.2, enemyStat.skullLevel2.hp,2));
+            }
+    }else if (currentlevel == 5) {
+        gameEngine.addEntity(new NotMovingElement(gameEngine, AM.getAsset("./img/level5bg.png"),0,0,1400,750,1));
+
+        map = [
+
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,2,2,2,2,0,0,2,0,0,0,2,0,0,2,2,2,0,0,0],
+            
+                        [0,2,0,0,0,0,0,2,2,0,0,2,0,0,2,0,0,2,0,0],
+            
+                        [0,2,2,2,2,0,0,2,0,2,0,2,0,0,2,0,0,2,0,0],
+            
+                        [0,2,0,0,0,0,0,2,0,0,2,2,0,0,2,0,0,2,0,0],
+            
+                        [0,2,2,2,2,0,0,2,0,0,0,2,0,0,2,2,2,0,0,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            
+            
+            
+                    ]
+            gameEngine.playerList[0].x = 960;
+            gameEngine.playerList[0].y = 660;
+
+            for(var i =0; i<5; i++) {
+                gameEngine.AIList.push(new AI
+                    (gameEngine,15,138,34,52,700,0,51,78,AM.getAsset("./img/sk.png"),1, enemyStat.skullLevel5.hp,2));
+            }
+            for(var i =0; i<5; i++) {
+                gameEngine.AIList.push(new AI
+                    (gameEngine,15,138,34,52,700,650,51,78,AM.getAsset("./img/normal2.png"),1.2, enemyStat.skullLevel5.hp,2));
+            }
+         
+            
+    }
+
+    for(var i =0; i<map.length; i++) {
+        for(var j = 0; j<map[i].length; j++) {
+            if(map[i][j] == 1) {                  
+                gameEngine.addEntity(new NotMovingElement(gameEngine, AM.getAsset("./img/house.png"),70*j,75*i,70,75)); 
+            } else if (map[i][j] == 2) {
+                gameEngine.bushList.push(new NotMovingElement(gameEngine, AM.getAsset("./img/bush2.png"),70*j,75*i,100,100,));
+            } else if (map[i][j] == 3) {
+                gameEngine.addEntity(new NotMovingElement(gameEngine, AM.getAsset("./img/bush3.png"),70*j,75*i,70,75,));
+            } else if (map[i][j] == 4) {
+                gameEngine.addEntity(new NotMovingElement(gameEngine, AM.getAsset("./img/circlestone.png"),70*j,75*i,70,75,1));
+            } else if(map[i][j] == 5) {                  
+                gameEngine.addEntity(new NotMovingElement(gameEngine, AM.getAsset("./img/tree.png"),70*j,75*i,70,75)); 
+            } else if (map[i][j] == 6) {
+                gameEngine.addEntity(new NotMovingElement(gameEngine, AM.getAsset("./img/stone.png"),70*j,75*i,70,75,));
+            } else if (map[i][j] == 7) {
+                gameEngine.addEntity(new NotMovingElement(gameEngine, AM.getAsset("./img/circlestone.png"),70*j,75*i,70,75,));
+            } else if (map[i][j] == 8) {
+                gameEngine.bushList.push(new NotMovingElement(gameEngine, AM.getAsset("./img/bush.png"),70*j,75*i,100,95,1));
+            } else if (map[i][j] == 9) {
+                gameEngine.addEntity(new NotMovingElement(gameEngine, AM.getAsset("./img/alien.png"),70*j,75*i,70,75,));
+            } 
+        }
+    }
+
+    // for(var i =0; i<3; i++) {
+    //     gameEngine.AIList.push(new AI
+    //         (gameEngine,15,138,34,52,400,0,51,78,AM.getAsset("./img/normal2.png"),1.2, 50,2));
+    // }
+    // for(var i =0; i<3; i++) {
+    //     gameEngine.AIList.push(new AI
+    //         (gameEngine,15,138,34,52,400,0,51,78,AM.getAsset("./img/sk.png"),1, 50,2));
+    // }
+
+    dropSupply(gameEngine);
+}
+
+function playMusic(name) {
+    if(isMute) return; 
+    if(name == "boss" || name == "normal") {
+        musicTrack  = new Audio('./sound/'+ name + currentlevel + '.mp3');
+        musicTrack.loop = true;
+    }else {
+        musicTrack  = new Audio('./sound/'+ name + '.mp3');
+    }
+    
+    musicTrack.volume = 0.3;   
+    
+    musicTrack.play();
+}
+
+function stopMusic() {
+    if(isMute) return;
+    if(musicTrack != null)musicTrack.pause();
+}
+
+
+function playSoundEffect(name) {
+    if(isMute) return;
+    gunFireTrack  = new Audio('./sound/'+ name + '.mp3');
+    if(name == "groza"){
+        gunFireTrack.volume = 0.3;
+    } else {gunFireTrack.volume = GUN_FIRE_VOLUMN;}
+    
+    gunFireTrack.play();
+}
+
+

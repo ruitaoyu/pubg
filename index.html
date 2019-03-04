@@ -1,15 +1,22 @@
-﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>PUBG 90s</title>
+    <script type="text/javascript" src="./Player.js"></script>
+    <script type="text/javascript" src="./AI.js"></script>
+
+    <script type="text/javascript" src="./Bullet.js"></script>
+    <script type="text/javascript" src="./SmartAI.js"></script>
+    <script type="text/javascript" src="./AIFire.js"></script>
+
+    <script type="text/javascript" src="./ruitaoyu_shortest_path.js"></script>
     <script type="text/javascript" src="./gameengine.js"></script>
     <script type="text/javascript" src="./assetmanager.js"></script>
     <script type="text/javascript" src="./main.js"></script>
 
-    
-        <style>
+      
+    <style>
         .container {
         position: relative;
         width: 100%;
@@ -41,86 +48,376 @@
         background-color: black;
         }
 
+.charDisplay{
+    width:80%;
+    max-width: 1450px;
+  
+        height: 200px;
+        float:left;
+
+}
+.readyBtn{
+    float :right;
+    width:20%;
+}
+#displayTitle{
+    width:100%;
+    height:100px;
+}
+#charDetail{
+    width:100%;
+    max-width: 1450px;
+    padding-top: 20px;
+    
+       
+        height: 200px;
+        float:right;
+
+}
+
+
+
+
+.charMainDisplay{
+    float: left;
+    width: 80%;
+    margin-left: 10%;
+    margin-right:10%;
+    
+}
+
         .chooseChar {
+            align-items: center;
         position: relative;
-        width: 100%;
+        width: 98%;
         max-width: 1450px;
+        background-color: black;
+        margin-left: 10px;
+        display: inline-block;
+        height: 820px;
         }
 
-        .chooseChar img {
+        #first, #second, #third{
+    text-align: center;
+    float: left;
+    width: 30%;
+    height: 400px;
+    /* border: 10px rgb(230, 228, 228) solid; */
+    padding-top: 5px;
+    margin-right: 10px;
+    position: relative;
+
+
+}
+
+
+#imgblur{
+    -webkit-filter: blur(10px); /* Safari 6.0 - 9.0 */
+  filter: blur(10px);
+}
+
+        .charMainDisplay img {
         width: 100%;
-        height: 850px;
+        height: 500px;
         }
+        .chooseChar .solid {border-style: solid; border: hotpink; border-width: 20;}
 
-        .chooseChar .btn2 {
+        .readyBtn .btn2 {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        -ms-transform: translate(-50%, -50%);
+        /* top: 50%;
+        left: 50%; */
+        /* transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%); */
         background-color: #555;
         color: white;
         font-size: 36px;
-        padding: 12px 24px;
+        margin-top: 60px;
+        /* padding: 12px 24px; */
         border: none;
         cursor: pointer;
         border-radius: 5px;
         text-align: center;
         }
 
-        .chooseChar .btn2:hover {
-        background-color: black;
-        }
+        /* .readyBtn .btn2:hover {
+        background-color: red;
+        } */
         </style>
 </head>
 <body>
     <div class="container" id="coverContainer"> 
         <img id = "cover" src="./img/pixelcover.png" alt="Flowers in Chania" >
-        <button class="btn" id="startBtn">START</button>
+        <button class="btn" id="startBtn">START(K)</button>
     </div>
-        <audio id="chooseSong" loop>
-                <!-- <source src="horse.ogg" type="audio/ogg"> -->
-                <source src="./sound/choose.mp3" type="audio/mpeg">
-        </audio>
-        <audio id="china" loop>
-                <!-- <source src="horse.ogg" type="audio/ogg"> -->
-                <source src="./sound/china.mp3" type="audio/mpeg">
-        </audio>
+
+
 
     <div class="chooseChar" id="chooseContainer"> 
-            <img id = "select" src="./img/select.jpg" alt="Flowers in Chania" >
-            <button class="btn2" id="gamestart">START</button>
+        <div class="displayTitle"><center><H1 style="color:red;">Choose Character</H1></center></div>
+            <!-- <img id = "select" src="./img/select.jpg" alt="Flowers in Chania" > -->
+            <div id="charMainDisplay" id="charMainDisplay">
+            <div class="first" id="first"><img src="./img/pic1.png" alt="pic1" height="500" class="blurhandle1" id="imgblur"></div>
+            <div class="second" id="second"><img src="./img/pic2.png" alt="pic1" class="blurhandle2" id="noblur"></div>
+            <div class="third" id="third"><img src="./img/pic3.png" alt="pic1" class="blurhandle3" id="imgblur"></div>
+            
+
+        </div>
+        <div class="charDetail">
+            <div class="charDisplay" id="charDisplay" class="charDisplay">
+                
+                <img src="./img/img2d.png" id="imagedetail" class="imagedetail">
+                <p class="player" id="player">player1</p>
+
+            </div>
+            <div class="readyBtn" >
+                <button class="btn2" id="gamestart" disabled="true">Ready(K)</button>
+
+            </div>
+        </div>
+            
+        </div>
+
+
+    <div class="information" id="showInfo" style="display:none" width = "1400px" height="800px" position="relative" > 
+
+         <button id="btnInfo" >CLOSE</button>
+
+         <img id = "imgInfo" src="./img/imgInfo.png" width = "800px" height="850px"alt="Flowers in Chania"  >
     </div>
+
+    <style>
+
+        #imgInfo {
+            float: right;
+            width: 800px;
+            height: 850px;
+        }   
+        #btnInfo {
+            float: right;
+            width: 200px;
+            height: 50px;
+        }
+
+        #des {
+            float: left;
+            width: 200px;
+            height: 50px;
+        }
+    </style>
+
+
+
+
     <canvas id="gameWorld" tabindex="1" width="1400" height="750" style="border: 1px solid brown; background: lightskyblue"></canvas>
+
+    <div id="playerStatus">
+        <div id="player1" position="relative">
+            <img id = "player1Icon" src="./img/unknown.png" alt="icon1" width="49" height="49" >
+            <img id = "player1Item" src="./img/unknown.png" alt="item1" width="49" height="49" >
+            <div id="player1Bar"></div>
+        </div>
+        <div id="player2" position="relative" style="display: none;">
+            <img id = "player2Icon" src="./img/unknown.png" alt="icon2" width="49" height="49" >
+            <img id = "player2Item" src="./img/unknown.png" alt="item2" width="49" height="49" >
+            <div id="player2Bar"></div>
+        </div>
+        <div id="player3" position="relative" style="display: none;">
+            <img id = "player3Icon" src="./img/unknown.png" alt="icon3" width="49" height="49" >
+            <img id = "player3Item" src="./img/unknown.png" alt="item3" width="49" height="49" >
+            <div id="player3Bar"></div>
+        </div>
+        <!-- <div id="player4" position="relative"></div> -->
+        <button id="player4">CLICK ME FOR INFO</button>
+
+
+    </div>
+
+
+    
+
+    
+    <style>
+        #playerStatus {
+        width: 1420px;
+        height: 100px;
+        position: relative;
+        }
+
+        #player1 {
+        width: 320px;
+        height: 50px;
+        background-color:lightgray;
+        float: left;
+        border-width:1px;
+        border-style:solid;
+        border-color:grey;
+        margin-left: 10px;
+
+        }
+        #player2 {
+        width: 320px;
+        height: 50px;
+        background-color:lightgray;
+        float: left;
+        border-width:1px;
+        border-style:solid;
+        border-color:grey;
+        margin-left: 30px;
+        }
+        #player3 {
+            width: 320px;
+        height: 50px;
+        background-color:lightgray;
+        float: left;
+        border-width:1px;
+        border-style:solid;
+        border-color:grey;
+        margin-left: 30px;
+        }
+        #player4 {
+        font-size: 20px;
+        font:bolder;
+        width: 320px;
+        height: 50px;
+        background-color:lightgray;
+        float: left;
+        border-width:1px;
+        border-style:solid;
+        border-color:grey;
+        margin-left: 30px;
+        }
+
+        #player1Bar {
+        width: 210px;
+        height: 49px;
+        background-color:rgb(20, 221, 70);
+        float: right;
+        }
+        #player2Bar {
+        width: 210px;
+        height: 49px;
+        background-color:rgb(255, 255, 255);
+        float: right;
+        }
+        #player3Bar {
+        width: 210px;
+        height: 49px;
+        background-color:rgb(255, 255, 255);
+        float: right;
+        }
+
+    </style>
     
     <script>
+
+          
             var x = document.getElementById("startBtn");
             
-            x.addEventListener("click", mySecondFunction);
+             x.addEventListener("click", mySecondFunction);
      
             var enter = document.getElementById("gamestart");
             
             enter.addEventListener("click", myFunction);
+
+
+            var info = document.getElementById("player4");
+            
+            info.addEventListener("click", showInfo);
+
+            var btnInfo = document.getElementById("btnInfo");
+            
+            btnInfo.addEventListener("click", closeInfo);
             
    
             
             function mySecondFunction() {
                 document.getElementById("coverContainer").style.display = "none"
-                //document.getElementById("btn").style.display = "none"
-                document.getElementById("chooseSong").play()
-                //document.getElementById('gameWorld').focus();;
+                //playMusic("normal");
 
             }
 
             function myFunction() {
                 console.log("in");
                 document.getElementById("chooseContainer").style.display = "none"
-                //document.getElementById("btn").style.display = "none"
-                document.getElementById("chooseSong").src="";
-                document.getElementById("china").play()
-                document.getElementById('gameWorld').focus();;
+
+                document.getElementById('gameWorld').focus();
+                start();
 
             }
+            //----
+            
+            
+            
+        var selected=1;
+                    
+        document.getElementById("first").addEventListener("click", function(){
+        selected = 1;
+        document.getElementById("player").innerHTML= "Player 1";
+        console.log("selected is --------"+selected);
+        document.getElementsByClassName("blurhandle2")[0].id="imgblur";
+        document.getElementsByClassName("blurhandle1")[0].id="noblur";
+        document.getElementsByClassName("blurhandle3")[0].id="imgblur";
+        document.getElementById("imagedetail").src= "./img/img1d.png";
+        playerName = 'arjun';
+        
+        });
+        document.getElementById("second").addEventListener("click", function(){
+        selected = 2;
+        document.getElementById("player").innerHTML= "Player 2";
+        console.log("selected is --------"+selected);
+        console.log("----------"+document.getElementsByClassName("blurhandle2")[0].id);
+        document.getElementsByClassName("blurhandle2")[0].id="noblur";
+        document.getElementsByClassName("blurhandle1")[0].id="imgblur";
+        document.getElementsByClassName("blurhandle3")[0].id="imgblur";
+        document.getElementById("imagedetail").src= "./img/img2d.png";
+        playerName = 'saitama';
+
+        });
+        document.getElementById("third").addEventListener("click", function(){
+        selected = 3;
+        document.getElementById("player").innerHTML= "Player 3";
+        console.log("selected is --------"+selected);
+        document.getElementsByClassName("blurhandle2")[0].id="imgblur";
+        document.getElementsByClassName("blurhandle1")[0].id="imgblur";
+        document.getElementsByClassName("blurhandle3")[0].id="noblur";
+        document.getElementById("imagedetail").src= "./img/img3d.png";
+        playerName = 'fin';
+        });
+        //------
+
+    
+            
+            function showInfo() {
+                console.log("in");
+                document.getElementById("showInfo").style.display = "block"
+                // document.getElementById("chooseSong").src="";
+                // document.getElementById('gameWorld').focus();;
+
+            }
+            function closeInfo() {
+                //console.log("in");
+                document.getElementById("showInfo").style.display = "none"
+                // document.getElementById("chooseSong").src="";
+                // document.getElementById("china").play()
+                document.getElementById('gameWorld').focus();
+                
+
+            }
+
+            window.addEventListener("keypress", function (e) {
+                if(e.code === "KeyK" ) {
+                    
+                    document.getElementById('startBtn').click();
+                    document.getElementById('startBtn').disabled = true;
+                    
+
+                    //$('.readyBtn .btn2').prop('disabled', false);
+                    document.getElementById('gamestart').click();
+                    document.getElementById('gamestart').disabled = false;
+
+                    console.log(GUN_FIRE_VOLUMN);
+                }
+            }, false);
             
   
     </script>
